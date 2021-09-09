@@ -5,7 +5,9 @@ import { eventsMixin } from './events'
 import { lifecycleMixin } from './lifecycle'
 import { warn } from '../util/index'
 
+// Vue  是一个方法，原型上的各个实例解耦在各个文件中
 function Vue (options) {
+  console.log(options,'options')
   if (process.env.NODE_ENV !== 'production' &&
     !(this instanceof Vue)
   ) {
