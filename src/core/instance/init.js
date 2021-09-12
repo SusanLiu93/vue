@@ -66,7 +66,6 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     if (vm.$options.el) {
-      debugger
       vm.$mount(vm.$options.el)
     }
   }
