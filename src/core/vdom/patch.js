@@ -121,7 +121,7 @@ export function createPatchFunction (backend) {
   }
 
   let creatingElmInVPre = 0
-
+  // 将vnode 转换成真实的dom 节点 并添加到其父元素中
   function createElm (
     vnode,
     insertedVnodeQueue,
@@ -162,9 +162,9 @@ export function createPatchFunction (backend) {
           )
         }
       }
-
+      // 创建dom 节点 挂载到vnode的elm 属性上面
       vnode.elm = vnode.ns
-        ? nodeOps.createElementNS(vnode.ns, tag)
+        ? nodeOps.createElementNS(vnode.ns, tag) // 创建带有命名空间的dom
         : nodeOps.createElement(tag, vnode)
       setScope(vnode)
 
@@ -188,6 +188,7 @@ export function createPatchFunction (backend) {
           insert(parentElm, vnode.elm, refElm)
         }
       } else {
+        // 递归调用，创建dom 先子后父
         createChildren(vnode, children, insertedVnodeQueue)
         if (isDef(data)) {
           invokeCreateHooks(vnode, insertedVnodeQueue)
@@ -268,7 +269,7 @@ export function createPatchFunction (backend) {
     // a reactivated keep-alive component doesn't insert itself
     insert(parentElm, vnode.elm, refElm)
   }
-
+  // 将dom 元素插入到body 中
   function insert (parent, elm, ref) {
     if (isDef(parent)) {
       if (isDef(ref)) {
@@ -280,12 +281,13 @@ export function createPatchFunction (backend) {
       }
     }
   }
-
+  // 遍历vnode 的children ，先创建children元素, 深度遍历
   function createChildren (vnode, children, insertedVnodeQueue) {
     if (Array.isArray(children)) {
       if (process.env.NODE_ENV !== 'production') {
         checkDuplicateKeys(children)
       }
+      
       for (let i = 0; i < children.length; ++i) {
         createElm(children[i], insertedVnodeQueue, vnode.elm, null, true, children, i)
       }
@@ -580,6 +582,7 @@ export function createPatchFunction (backend) {
       vnode.parent.data.pendingInsert = queue
     } else {
       for (let i = 0; i < queue.length; ++i) {
+        // insert 钩子函数 在create-component componentVNodeHooks 中注册 
         queue[i].data.hook.insert(queue[i])
       }
     }
@@ -705,7 +708,6 @@ export function createPatchFunction (backend) {
 
     let isInitialPatch = false
     const insertedVnodeQueue = []
-
     if (isUndef(oldVnode)) {
       // empty mount (likely as component), create new root element
       isInitialPatch = true
@@ -716,10 +718,12 @@ export function createPatchFunction (backend) {
         // patch existing root node
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
       } else {
+        // 真实的 dom 节点
         if (isRealElement) {
           // mounting to a real element
           // check if this is server-rendered content and if we can perform
           // a successful hydration.
+          // 服务端渲染
           if (oldVnode.nodeType === 1 && oldVnode.hasAttribute(SSR_ATTR)) {
             oldVnode.removeAttribute(SSR_ATTR)
             hydrating = true
@@ -740,22 +744,23 @@ export function createPatchFunction (backend) {
           }
           // either not server-rendered, or hydration failed.
           // create an empty node and replace it
+          // 创建一个空的vnode
           oldVnode = emptyNodeAt(oldVnode)
         }
 
         // replacing existing element
-        const oldElm = oldVnode.elm
-        const parentElm = nodeOps.parentNode(oldElm)
+        const oldElm = oldVnode.elm // app
+        const parentElm = nodeOps.parentNode(oldElm) // body
 
-        // create new node
+        // 页面中创建dom元素
         createElm(
-          vnode,
+          vnode, // 经render()编译，new vNode() 生成的vnode
           insertedVnodeQueue,
           // extremely rare edge case: do not insert if old element is in a
           // leaving transition. Only happens when combining transition +
           // keep-alive + HOCs. (#4590)
           oldElm._leaveCb ? null : parentElm,
-          nodeOps.nextSibling(oldElm)
+          nodeOps.nextSibling(oldElm) // 兄弟节点
         )
 
         // update parent placeholder node element, recursively
@@ -796,7 +801,7 @@ export function createPatchFunction (backend) {
         }
       }
     }
-
+ 
     invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
     return vnode.elm
   }

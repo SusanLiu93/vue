@@ -57,15 +57,17 @@ export function initLifecycle (vm: Component) {
 
 export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
-    const vm: Component = this
+    const vm: Component = this // 当前组件
     const prevEl = vm.$el
     const prevVnode = vm._vnode
     const restoreActiveInstance = setActiveInstance(vm)
+    // vnode：render() 生成的vnode 
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
       // initial render
+      // vm.$el 当前的dom container
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
       // updates
@@ -138,6 +140,10 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// 初始化渲染watcher 
+// 渲染watcher 会首先执行一次回调函数  updateComponent
+// updateComponent : 将调用_update 然后将render 函数转成vnode
+// 将vnode patch到dom中
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -164,6 +170,7 @@ export function mountComponent (
       }
     }
   }
+  // 在此执行 beforeMount 钩子函数
   callHook(vm, 'beforeMount')
 
   // 一个更新方法
@@ -188,6 +195,7 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
+     // vm._render() 返回vnode函数
       vm._update(vm._render(), hydrating)
     }
   }

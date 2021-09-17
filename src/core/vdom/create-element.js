@@ -43,7 +43,7 @@ export function createElement (
   }
   return _createElement(context, tag, data, children, normalizationType)
 }
-
+// 创建创建 vnode 
 export function _createElement (
   context: Component,
   tag?: string | Class<Component> | Function | Object,
@@ -51,7 +51,6 @@ export function _createElement (
   children?: any,
   normalizationType?: number
 ): VNode | Array<VNode> {
-  console.log(context,'**')
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -110,7 +109,7 @@ export function _createElement (
         undefined, undefined, context
       )
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
-      // component
+      // component -- 组件 
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements

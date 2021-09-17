@@ -108,11 +108,13 @@ export function createComponent (
   if (isUndef(Ctor)) {
     return
   }
-
+  // 在 compiler/index.js 中 context.$options._base = Vue
   const baseCtor = context.$options._base
 
   // plain options object: turn it into a constructor
+  // 普通组件走的流程
   if (isObject(Ctor)) {
+    //  Vue.extend(Ctor) 将Ctor 转换成继承于Vue 的构造函数
     Ctor = baseCtor.extend(Ctor)
   }
 
@@ -183,10 +185,12 @@ export function createComponent (
   }
 
   // install component management hooks onto the placeholder node
+  // 将一些钩子函数挂载到data.hooks上
   installComponentHooks(data)
 
   // return a placeholder vnode
   const name = Ctor.options.name || tag
+  // vue-component ----  组件的vnode的tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, context,
@@ -222,6 +226,8 @@ export function createComponentInstanceForVnode (
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
+  // vnode.componentOptions.Ctor 继承于Vue，所以new 创建的时候会去执行 new Vue 走一遍这个过程
+  // 这个过程中 子组件会先父组件挂载 mounted 
   return new vnode.componentOptions.Ctor(options)
 }
 

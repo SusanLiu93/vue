@@ -3196,11 +3196,13 @@
     if (isUndef(Ctor)) {
       return
     }
-
+    // 在 compiler/index.js 中 context.$options._base = Vue
     var baseCtor = context.$options._base;
 
     // plain options object: turn it into a constructor
+    // 普通组件走的流程
     if (isObject(Ctor)) {
+      //  Vue.extend(Ctor) 将Ctor 转换成继承于Vue 的构造函数
       Ctor = baseCtor.extend(Ctor);
     }
 
@@ -3271,10 +3273,12 @@
     }
 
     // install component management hooks onto the placeholder node
+    // 将一些钩子函数挂载到data.hooks上
     installComponentHooks(data);
 
     // return a placeholder vnode
     var name = Ctor.options.name || tag;
+    // vue-component ----  组件的vnode的tag
     var vnode = new VNode(
       ("vue-component-" + (Ctor.cid) + (name ? ("-" + name) : '')),
       data, undefined, undefined, undefined, context,
@@ -3302,6 +3306,8 @@
       options.render = inlineTemplate.render;
       options.staticRenderFns = inlineTemplate.staticRenderFns;
     }
+    // vnode.componentOptions.Ctor 继承于Vue，所以new 创建的时候会去执行 new Vue 走一遍这个过程
+    // 这个过程中 子组件会先父组件挂载 mounted 
     return new vnode.componentOptions.Ctor(options)
   }
 
@@ -3357,9 +3363,9 @@
   // wrapper function for providing a more flexible interface
   // without getting yelled at by flow
   function createElement (
-    context,
-    tag,
-    data,
+    context, // 上下文
+    tag, // 标签
+    data,// 数据
     children,
     normalizationType,
     alwaysNormalize
@@ -3374,7 +3380,7 @@
     }
     return _createElement(context, tag, data, children, normalizationType)
   }
-
+  // 创建创建 vnode 
   function _createElement (
     context,
     tag,
@@ -3440,7 +3446,7 @@
           undefined, undefined, context
         );
       } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
-        // component
+        // component -- 组件 
         vnode = createComponent(Ctor, data, context, children, tag);
       } else {
         // unknown or unlisted namespaced elements
@@ -3498,7 +3504,7 @@
 
   /*  */
 
-  function initRender (vm) {
+  function initRender(vm) {
     vm._vnode = null; // the root of the child tree
     vm._staticTrees = null; // v-once cached trees
     var options = vm.$options;
@@ -3532,14 +3538,14 @@
 
   var currentRenderingInstance = null;
 
-  function renderMixin (Vue) {
+  function renderMixin(Vue) {
     // install runtime convenience helpers
     installRenderHelpers(Vue.prototype);
 
     Vue.prototype.$nextTick = function (fn) {
       return nextTick(fn, this)
     };
-
+    // 将dom 渲染成vnode
     Vue.prototype._render = function () {
       var vm = this;
       var ref = vm.$options;
@@ -3635,6 +3641,7 @@
     factory,
     baseCtor
   ) {
+    // 高级组件使用
     if (isTrue(factory.error) && isDef(factory.errorComp)) {
       return factory.errorComp
     }
@@ -3678,7 +3685,7 @@
           }
         }
       };
-
+      // 获取到异步组件资源后执行
       var resolve = once(function (res) {
         // cache resolved
         factory.resolved = ensureCtor(res, baseCtor);
@@ -3943,15 +3950,17 @@
 
   function lifecycleMixin (Vue) {
     Vue.prototype._update = function (vnode, hydrating) {
-      var vm = this;
+      var vm = this; // 当前组件
       var prevEl = vm.$el;
       var prevVnode = vm._vnode;
       var restoreActiveInstance = setActiveInstance(vm);
+      // vnode：render() 生成的vnode 
       vm._vnode = vnode;
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
       if (!prevVnode) {
         // initial render
+        // vm.$el 当前的dom container
         vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
       } else {
         // updates
@@ -4024,6 +4033,10 @@
     };
   }
 
+  // 初始化渲染watcher 
+  // 渲染watcher 会首先执行一次回调函数  updateComponent
+  // updateComponent : 将调用_update 然后将render 函数转成vnode
+  // 将vnode patch到dom中
   function mountComponent (
     vm,
     el,
@@ -4050,9 +4063,11 @@
         }
       }
     }
+    // 在此执行 beforeMount 钩子函数
     callHook(vm, 'beforeMount');
 
-    var updateComponent;
+    // 一个更新方法
+    var updateComponent;  
     /* istanbul ignore if */
     if ( config.performance && mark) {
       updateComponent = function () {
@@ -4073,6 +4088,7 @@
       };
     } else {
       updateComponent = function () {
+       // vm._render() 返回vnode函数
         vm._update(vm._render(), hydrating);
       };
     }
@@ -4080,6 +4096,8 @@
     // we set this to vm._watcher inside the watcher's constructor
     // since the watcher's initial patch may call $forceUpdate (e.g. inside child
     // component's mounted hook), which relies on vm._watcher being already defined
+    // 初始化渲染watcher，updateComponent 作为回调函数传进去的时候会执行一次
+    // 
     new Watcher(vm, updateComponent, noop, {
       before: function before () {
         if (vm._isMounted && !vm._isDestroyed) {
@@ -4990,6 +5008,7 @@
         // internal component options needs special treatment.
         initInternalComponent(vm, options);
       } else {
+        // 合并options
         vm.$options = mergeOptions(
           resolveConstructorOptions(vm.constructor),
           options || {},
@@ -5002,13 +5021,16 @@
       }
       // expose real self
       vm._self = vm;
+      
       initLifecycle(vm);
       initEvents(vm);
       initRender(vm);
+      // 在beforeCreate 中无法访问data props 等
       callHook(vm, 'beforeCreate');
       initInjections(vm); // resolve injections before data/props
       initState(vm);
       initProvide(vm); // resolve provide after data/props
+      // 在 created 中可以访问 data props methods
       callHook(vm, 'created');
 
       /* istanbul ignore if */
@@ -5019,7 +5041,6 @@
       }
 
       if (vm.$options.el) {
-        debugger
         vm.$mount(vm.$options.el);
       }
     };
@@ -5083,19 +5104,34 @@
 
   // Vue  是一个方法，原型上的各个实例解耦在各个文件中
   function Vue (options) {
-    console.log(options,'options');
     if (
       !(this instanceof Vue)
     ) {
       warn('Vue is a constructor and should be called with the `new` keyword');
     }
+    // mergeOptions 调用 将vm 还有构造函数的options 和当前实例的options 合并
+    // 初始化生命周期，events,render ,inject state provide 
+    // 调用$mount
     this._init(options);
   }
-
+  // core/global-api/index.js 中 将'component','directive','filter' 这三个属性挂载到Vue.options
+  // 同时也将 Vue 赋值给 Vue.options._base 
+  // 将_init挂载到Vue 原型上
   initMixin(Vue);
+  // 将$watch $set 等挂载到原型上
   stateMixin(Vue);
+  // 将$on,off,once,emit 挂载到原型上
   eventsMixin(Vue);
+  // _update $forceUpdate $destroy挂载到原型上
+  // 父子组件生命周期钩子函数执行顺序: 
+  // parent BeforeCreate → parent Created → parent beforeMount → child beforeCreate → child created → child beforeMount 
+  // → child mounted → parent mounted 
+  // 销毁子组件：child beforeDestroy → child destroyed
+  // 销毁父组件: parent beforeDestroy  → child beforeDestroy() → child destroyed() → parent destroyed()
+  // 更新子组件： 目前测试结果  child beforeUpdate → child updated
+  // 更新父组件: 目前测试结果 parent beforeUpdate → parent updated
   lifecycleMixin(Vue);
+  // $nextTick _render 挂载到原型上
   renderMixin(Vue);
 
   /*  */
@@ -5223,6 +5259,8 @@
 
   /*  */
 
+
+  // 主要是将 component directive filter 注册到全局Vue.options 上面
   function initAssetRegisters (Vue) {
     /**
      * Create asset registration methods.
@@ -5239,6 +5277,7 @@
           if ( type === 'component') {
             validateComponentName(id);
           }
+          // 如果是组件，那么将该函数转换成继承于Vue 的构造函数，使其拥有Vue原型链上的属性和方法
           if (type === 'component' && isPlainObject(definition)) {
             definition.name = definition.name || id;
             definition = this.options._base.extend(definition);
@@ -5451,7 +5490,8 @@
       observe(obj);
       return obj
     };
-
+    
+    
     Vue.options = Object.create(null);
     ASSET_TYPES.forEach(function (type) {
       Vue.options[type + 's'] = Object.create(null);
@@ -5942,7 +5982,7 @@
     }
 
     var creatingElmInVPre = 0;
-
+    // 将vnode 转换成真实的dom 节点 并添加到其父元素中
     function createElm (
       vnode,
       insertedVnodeQueue,
@@ -5983,14 +6023,15 @@
             );
           }
         }
-
+        // 创建dom 节点 挂载到vnode的elm 属性上面
         vnode.elm = vnode.ns
-          ? nodeOps.createElementNS(vnode.ns, tag)
+          ? nodeOps.createElementNS(vnode.ns, tag) // 创建带有命名空间的dom
           : nodeOps.createElement(tag, vnode);
         setScope(vnode);
 
         /* istanbul ignore if */
         {
+          // 递归调用，创建dom 先子后父
           createChildren(vnode, children, insertedVnodeQueue);
           if (isDef(data)) {
             invokeCreateHooks(vnode, insertedVnodeQueue);
@@ -6071,7 +6112,7 @@
       // a reactivated keep-alive component doesn't insert itself
       insert(parentElm, vnode.elm, refElm);
     }
-
+    // 将dom 元素插入到body 中
     function insert (parent, elm, ref) {
       if (isDef(parent)) {
         if (isDef(ref)) {
@@ -6083,12 +6124,13 @@
         }
       }
     }
-
+    // 遍历vnode 的children ，先创建children元素, 深度遍历
     function createChildren (vnode, children, insertedVnodeQueue) {
       if (Array.isArray(children)) {
         {
           checkDuplicateKeys(children);
         }
+        
         for (var i = 0; i < children.length; ++i) {
           createElm(children[i], insertedVnodeQueue, vnode.elm, null, true, children, i);
         }
@@ -6383,6 +6425,7 @@
         vnode.parent.data.pendingInsert = queue;
       } else {
         for (var i = 0; i < queue.length; ++i) {
+          // insert 钩子函数 在create-component componentVNodeHooks 中注册 
           queue[i].data.hook.insert(queue[i]);
         }
       }
@@ -6510,7 +6553,6 @@
 
       var isInitialPatch = false;
       var insertedVnodeQueue = [];
-
       if (isUndef(oldVnode)) {
         // empty mount (likely as component), create new root element
         isInitialPatch = true;
@@ -6521,10 +6563,12 @@
           // patch existing root node
           patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly);
         } else {
+          // 真实的 dom 节点
           if (isRealElement) {
             // mounting to a real element
             // check if this is server-rendered content and if we can perform
             // a successful hydration.
+            // 服务端渲染
             if (oldVnode.nodeType === 1 && oldVnode.hasAttribute(SSR_ATTR)) {
               oldVnode.removeAttribute(SSR_ATTR);
               hydrating = true;
@@ -6545,22 +6589,23 @@
             }
             // either not server-rendered, or hydration failed.
             // create an empty node and replace it
+            // 创建一个空的vnode
             oldVnode = emptyNodeAt(oldVnode);
           }
 
           // replacing existing element
-          var oldElm = oldVnode.elm;
-          var parentElm = nodeOps.parentNode(oldElm);
+          var oldElm = oldVnode.elm; // app
+          var parentElm = nodeOps.parentNode(oldElm); // body
 
-          // create new node
+          // 页面中创建dom元素
           createElm(
-            vnode,
+            vnode, // 经render()编译，new vNode() 生成的vnode
             insertedVnodeQueue,
             // extremely rare edge case: do not insert if old element is in a
             // leaving transition. Only happens when combining transition +
             // keep-alive + HOCs. (#4590)
             oldElm._leaveCb ? null : parentElm,
-            nodeOps.nextSibling(oldElm)
+            nodeOps.nextSibling(oldElm) // 兄弟节点
           );
 
           // update parent placeholder node element, recursively
@@ -6601,7 +6646,7 @@
           }
         }
       }
-
+   
       invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch);
       return vnode.elm
     }
@@ -9091,7 +9136,6 @@
     el,
     hydrating
   ) {
-    debugger
     el = el && inBrowser ? query(el) : undefined;
     return mountComponent(this, el, hydrating)
   };
@@ -11942,7 +11986,6 @@
     el,
     hydrating
   ) {
-    debugger
     el = el && query(el);
 
     /* istanbul ignore if */

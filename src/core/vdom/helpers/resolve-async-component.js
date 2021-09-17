@@ -44,6 +44,7 @@ export function resolveAsyncComponent (
   factory: Function,
   baseCtor: Class<Component>
 ): Class<Component> | void {
+  // 高级组件使用
   if (isTrue(factory.error) && isDef(factory.errorComp)) {
     return factory.errorComp
   }
@@ -87,7 +88,7 @@ export function resolveAsyncComponent (
         }
       }
     }
-
+    // 获取到异步组件资源后执行
     const resolve = once((res: Object | Class<Component>) => {
       // cache resolved
       factory.resolved = ensureCtor(res, baseCtor)

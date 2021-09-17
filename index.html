@@ -1,26 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <!-- <script src="./dist/vue.js"></script> -->
-</head>
-<body>
+    <script type="text/x-template" id="my-test">
+      <button @click="$emit('on-click')"> 子组件测试 {{id}}</button>
+    </script>
+  </head>
+  <body>
     <div id="app">
-        {{msg}}
+      <!-- <span>父组件{{msg}}</span> -->
+      <my-test ref="childRef" @on-click='clkProcess'></my-test>
+      <!-- <async-btn @on-click='clkProcess'></async-btn> -->
     </div>
     <script src="./dist/vue.js"></script>
     <script type="module">
-        new Vue({
-            el:'#app',
-            data() {
-                return {
-                    msg:'hello vue'
-                }
-            },
-        })
+      // 注册全局组件
+      Vue.component("my-test", {
+        template: "#my-test",
+        data() {
+          return {
+            id: 3,
+          };
+        },
+        beforeCreate() {
+          console.log("child before create");
+        },
+        created() {
+          console.log("child created");
+        },
+        beforeMount() {
+          console.log("child beforeMount");
+        },
+        mounted() {
+          console.log("child mounted");
+        },
+        beforeUpdate() {
+          console.log("child beforeUpdate");
+        },
+        updated() {
+          console.log("child updated");
+        },
+        beforeDestroy() {
+          console.log("child before destroy");
+        },
+        destroyed() {
+          console.log("child destroyed");
+        },
+      });
+      // 注册异步组件
+      // Vue.component("async-btn", function (resolve, reject) {
+      //   setTimeout(() => {
+      //     resolve({
+      //       template:'<div>I am async!</div>'
+      //     })
+      //   }, 2000);
+      // });
+
+      const vm = new Vue({
+        el: "#app",
+        data() {
+          return {
+            msg: "hello vue",
+          };
+        },
+        beforeCreate() {
+          console.log("parent beforeCreate");
+        },
+        created() {
+          console.log("parent created");
+        },
+        beforeMount() {
+          console.log("parent beforeMount");
+        },
+        mounted() {
+          console.log("parent mounted");
+        },
+        beforeUpdate() {
+          console.log("parent beforeUpdate");
+        },
+        updated() {
+          console.log("parent updated");
+        },
+        beforeDestroy() {
+          console.log("parent before destroy");
+        },
+        destroyed() {
+          console.log("parent destroyed");
+        },
+        methods:{
+          clkProcess(){
+            console.log('haha')
+          }
+        }
+      });
+      window.vm = vm;
     </script>
-</body>
+  </body>
 </html>
