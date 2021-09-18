@@ -52,8 +52,8 @@ export default class Dep {
 // The current target watcher being evaluated.
 // This is globally unique because only one watcher
 // can be evaluated at a time.
-Dep.target = null
-const targetStack = []
+Dep.target = null // 全局依赖
+const targetStack = [] // 依赖栈
 
 export function pushTarget (target: ?Watcher) {
   targetStack.push(target)

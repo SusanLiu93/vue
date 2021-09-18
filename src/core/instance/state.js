@@ -145,9 +145,11 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
+      // 将vm._data.prop 代理到 vm.prop
       proxy(vm, `_data`, key)
     }
   }
+  // 
   // observe data
   observe(data, true /* asRootData */)
 }

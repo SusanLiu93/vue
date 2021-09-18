@@ -749,8 +749,8 @@
   // The current target watcher being evaluated.
   // This is globally unique because only one watcher
   // can be evaluated at a time.
-  Dep.target = null;
-  var targetStack = [];
+  Dep.target = null; // 全局依赖
+  var targetStack = []; // 依赖栈
 
   function pushTarget (target) {
     targetStack.push(target);
@@ -1031,7 +1031,7 @@
     if ((!getter || setter) && arguments.length === 2) {
       val = obj[key];
     }
-
+    // 递归调用遍历子对象，保证对象上的每个属性都是一个响应式对象
     var childOb = !shallow && observe(val);
     Object.defineProperty(obj, key, {
       enumerable: true,
@@ -1077,6 +1077,7 @@
    * triggers change notification if the property doesn't
    * already exist.
    */
+  // 将某个字段添加为响应式
   function set (target, key, val) {
     if (
       (isUndef(target) || isPrimitive(target))
@@ -4325,6 +4326,7 @@
     //    user watchers are created before the render watcher)
     // 3. If a component is destroyed during a parent component's watcher run,
     //    its watchers can be skipped.
+    // 从小到大排序 即先父后子
     queue.sort(function (a, b) { return a.id - b.id; });
 
     // do not cache length because more watchers might be pushed
@@ -4439,8 +4441,7 @@
 
   var uid$1 = 0;
 
-  /**
-   * A watcher parses an expression, collects dependencies,
+  /** * A watcher parses an expression, collects dependencies,
    * and fires callback when the expression value changes.
    * This is used for both the $watch() api and directives.
    */
@@ -4757,9 +4758,11 @@
           vm
         );
       } else if (!isReserved(key)) {
+        // 将vm._data.prop 代理到 vm.prop
         proxy(vm, "_data", key);
       }
     }
+    // 
     // observe data
     observe(data, true /* asRootData */);
   }
@@ -5129,7 +5132,7 @@
   // 销毁子组件：child beforeDestroy → child destroyed
   // 销毁父组件: parent beforeDestroy  → child beforeDestroy() → child destroyed() → parent destroyed()
   // 更新子组件： 目前测试结果  child beforeUpdate → child updated
-  // 更新父组件: 目前测试结果 parent beforeUpdate → parent updated
+  // 更新父组件: parent beforeUpdate → child beforeUpdate → child updated → parent updated
   lifecycleMixin(Vue);
   // $nextTick _render 挂载到原型上
   renderMixin(Vue);

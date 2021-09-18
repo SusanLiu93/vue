@@ -7,13 +7,14 @@
     <title>Document</title>
     <!-- <script src="./dist/vue.js"></script> -->
     <script type="text/x-template" id="my-test">
-      <button @click="$emit('on-click')"> 子组件测试 {{id}}</button>
+      <button @click="$emit('on-click')"> 子组件测试 {{myMsg}}</button>
     </script>
   </head>
   <body>
-    <div id="app">
+    <div id="app" @click='msg="hello update"'>
+      {{msg}} {{retMsg}}
       <!-- <span>父组件{{msg}}</span> -->
-      <my-test ref="childRef" @on-click='clkProcess'></my-test>
+      <my-test ref="childRef" :my-msg="msg" @on-click="clkProcess"></my-test>
       <!-- <async-btn @on-click='clkProcess'></async-btn> -->
     </div>
     <script src="./dist/vue.js"></script>
@@ -21,6 +22,12 @@
       // 注册全局组件
       Vue.component("my-test", {
         template: "#my-test",
+        props: {
+          myMsg: {
+            type: String,
+            default: "",
+          },
+        },
         data() {
           return {
             id: 3,
@@ -65,7 +72,14 @@
         data() {
           return {
             msg: "hello vue",
+            comMsg:'hello computed',
+            obj: {},
           };
+        },
+        computed:{
+          retMsg(){
+            return this.comMsg
+          }
         },
         beforeCreate() {
           console.log("parent beforeCreate");
@@ -77,6 +91,7 @@
           console.log("parent beforeMount");
         },
         mounted() {
+          this.$set(this.obj, "test", "hello $set");
           console.log("parent mounted");
         },
         beforeUpdate() {
@@ -91,11 +106,11 @@
         destroyed() {
           console.log("parent destroyed");
         },
-        methods:{
-          clkProcess(){
-            console.log('haha')
-          }
-        }
+        methods: {
+          clkProcess() {
+            console.log("haha");
+          },
+        },
       });
       window.vm = vm;
     </script>

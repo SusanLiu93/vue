@@ -152,7 +152,7 @@ export function defineReactive (
   if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
   }
-
+  // 递归调用遍历子对象，保证对象上的每个属性都是一个响应式对象
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
@@ -198,6 +198,7 @@ export function defineReactive (
  * triggers change notification if the property doesn't
  * already exist.
  */
+// 将某个字段添加为响应式
 export function set (target: Array<any> | Object, key: any, val: any): any {
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))

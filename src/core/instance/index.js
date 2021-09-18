@@ -32,7 +32,7 @@ eventsMixin(Vue)
 // 销毁子组件：child beforeDestroy → child destroyed
 // 销毁父组件: parent beforeDestroy  → child beforeDestroy() → child destroyed() → parent destroyed()
 // 更新子组件： 目前测试结果  child beforeUpdate → child updated
-// 更新父组件: 目前测试结果 parent beforeUpdate → parent updated
+// 更新父组件: parent beforeUpdate → child beforeUpdate → child updated → parent updated
 lifecycleMixin(Vue)
 // $nextTick _render 挂载到原型上
 renderMixin(Vue)
