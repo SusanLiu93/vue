@@ -12,9 +12,10 @@
   </head>
   <body>
     <div id="app" @click='msg="hello update"'>
-      {{msg}} {{retMsg}}
-      <!-- <span>父组件{{msg}}</span> -->
-      <my-test ref="childRef" :my-msg="msg" @on-click="clkProcess"></my-test>
+      <!-- msg -->
+      <!-- {{retMsg}} -->
+      <span>父组件{{arr}}</span>
+      <!-- <my-test ref="childRef" :my-msg="msg" @on-click="clkProcess"></my-test> -->
       <!-- <async-btn @on-click='clkProcess'></async-btn> -->
     </div>
     <script src="./dist/vue.js"></script>
@@ -72,15 +73,27 @@
         data() {
           return {
             msg: "hello vue",
-            comMsg:'hello computed',
-            obj: {},
+            comMsg: "hello computed",
+            obj: {
+              a:1
+            },
+            arr:[1,2]
           };
         },
-        computed:{
-          retMsg(){
-            return this.comMsg
-          }
+        watch: {
+          msg: {
+            handler() {
+              console.log("msg changed");
+            },
+            // deep: true,
+            // immediate: true,
+          },
         },
+        // computed:{
+        //   retMsg(){
+        //     return this.comMsg
+        //   }
+        // },
         beforeCreate() {
           console.log("parent beforeCreate");
         },

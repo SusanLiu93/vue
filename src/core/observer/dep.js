@@ -57,6 +57,7 @@ const targetStack = [] // 依赖栈
 
 export function pushTarget (target: ?Watcher) {
   targetStack.push(target)
+  // 将当前的watcher 赋值给全局变量target
   Dep.target = target
 }
 

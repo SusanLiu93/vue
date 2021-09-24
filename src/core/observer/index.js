@@ -43,6 +43,9 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
+    // 将当前需要被观察的对象(data/props/methods等) 赋值给自身的__obj__属性上
+    // 看成 value.__obj__  === new Observer()
+    //  value.__obj__.value = vm._data
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
       if (hasProto) {
@@ -112,6 +115,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     return
   }
   let ob: Observer | void
+  // 该属性/data/props/methods等 已经是响应式属性了
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
@@ -121,7 +125,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
-    ob = new Observer(value)
+    ob = new Observer(value) // value vm._data
   }
   if (asRootData && ob) {
     ob.vmCount++
@@ -152,12 +156,13 @@ export function defineReactive (
   if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
   }
-  // 递归调用遍历子对象，保证对象上的每个属性都是一个响应式对象
+  // 递归遍历子对象，保证对象上的每个属性都是一个响应式对象
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
+      // 当调用render函数的时候，会触发get
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
         dep.depend()
@@ -205,15 +210,20 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 处理数组
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
     return val
   }
+  // 对象 ：如果该属性在原对象中存在，直接赋值就会触发dom更新
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
   }
+  /////////////////////////以下逻辑就是给对象新增属性，并且将该属性变成响应式对象，手动的触发更新/////////////////////////////////////
+  // ob 拿到的应该是Observer 实例  在 Observer 创建实例时候赋值的 
+  // ob.value === vm._data
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -226,7 +236,10 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     target[key] = val
     return val
   }
+  // ob.value 存储当前vm 实例的data 数据
+  // 将对象新增的属性变成响应式属性
   defineReactive(ob.value, key, val)
+  // 同时手动的调用通知该对象的依赖
   ob.dep.notify()
   return val
 }

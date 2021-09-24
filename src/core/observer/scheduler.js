@@ -77,6 +77,7 @@ function flushSchedulerQueue () {
   // This ensures that:
   // 1. Components are updated from parent to child. (because parent is always
   //    created before the child)
+  // 用户定义的watch 先于渲染watcher执行
   // 2. A component's user watchers are run before its render watcher (because
   //    user watchers are created before the render watcher)
   // 3. If a component is destroyed during a parent component's watcher run,
@@ -130,6 +131,7 @@ function flushSchedulerQueue () {
 
 function callUpdatedHooks (queue) {
   let i = queue.length
+  // 从子到父
   while (i--) {
     const watcher = queue[i]
     const vm = watcher.vm

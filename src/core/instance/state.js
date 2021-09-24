@@ -247,6 +247,7 @@ function createComputedGetter (key) {
   return function computedGetter () {
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
+      // computed watcher 
       if (watcher.dirty) {
         watcher.evaluate()
       }
@@ -358,6 +359,7 @@ export function stateMixin (Vue: Class<Component>) {
     }
     options = options || {}
     options.user = true
+    // 用户定义的watcher
     const watcher = new Watcher(vm, expOrFn, cb, options)
     if (options.immediate) {
       const info = `callback for immediate watcher "${watcher.expression}"`
