@@ -11,11 +11,12 @@ const seenObjects = new Set()
  * getters, so that every nested property inside the object
  * is collected as a "deep" dependency.
  */
+//  配合 watcher.js {b:1}
 export function traverse (val: any) {
   _traverse(val, seenObjects)
   seenObjects.clear()
 }
-
+// 深度递归对象，遍历
 function _traverse (val: any, seen: SimpleSet) {
   let i, keys
   const isA = Array.isArray(val)

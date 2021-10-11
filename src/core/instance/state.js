@@ -359,8 +359,9 @@ export function stateMixin (Vue: Class<Component>) {
     }
     options = options || {}
     options.user = true
-    // 用户定义的watcher
+    // 用户定义的watch
     const watcher = new Watcher(vm, expOrFn, cb, options)
+    // user watcher  当设置immediate，会主动执行一次handler()
     if (options.immediate) {
       const info = `callback for immediate watcher "${watcher.expression}"`
       pushTarget()

@@ -440,7 +440,7 @@ export function createPatchFunction (backend) {
         patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
         canMove && nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm))
         oldStartVnode = oldCh[++oldStartIdx]
-        newEndVnode = newCh[--newEndIdx]
+        newEndVnode = newCh[--newEndIdx]/*  */
       } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
         patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
         canMove && nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm)
@@ -608,7 +608,7 @@ export function createPatchFunction (backend) {
     }
     // assert node match
     if (process.env.NODE_ENV !== 'production') {
-      if (!assertNodeMatch(elm, vnode, inVPre)) {
+      if (!assertNodeMatch(elm, vnode, inVPre))  {
         return false
       }
     }

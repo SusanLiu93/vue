@@ -68,6 +68,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (!prevVnode) {
       // initial render
       // vm.$el 当前的dom container
+      // web runtime/index.js
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
       // updates
@@ -203,7 +204,7 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
-  // 初始化渲染watcher，updateComponent 作为回调函数传进去的时候会执行一次
+  // 初始化 渲染watcher，updateComponent 作为回调函数传进去的时候会执行一次
   // 
   new Watcher(vm, updateComponent, noop, {
     before () {

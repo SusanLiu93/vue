@@ -63,6 +63,7 @@ export function parseHTML (html, options) {
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
       let textEnd = html.indexOf('<')
+      // 标签开始/结束
       if (textEnd === 0) {
         // Comment:
         if (comment.test(html)) {
@@ -95,6 +96,7 @@ export function parseHTML (html, options) {
         }
 
         // End tag:
+        // 结束 eg</ul>
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           const curIndex = index
@@ -104,8 +106,10 @@ export function parseHTML (html, options) {
         }
 
         // Start tag:
+        // 解析开始标签，返回{} 包括标签名 + 一些属性
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
+          // 处理解析出来的标签
           handleStartTag(startTagMatch)
           if (shouldIgnoreFirstNewline(startTagMatch.tagName, html)) {
             advance(1)
@@ -113,10 +117,11 @@ export function parseHTML (html, options) {
           continue
         }
       }
-
+      // 文本处理
       let text, rest, next
       if (textEnd >= 0) {
         rest = html.slice(textEnd)
+        // while 主要找到真正得结束位置
         while (
           !endTag.test(rest) &&
           !startTagOpen.test(rest) &&
@@ -129,6 +134,7 @@ export function parseHTML (html, options) {
           textEnd += next
           rest = html.slice(textEnd)
         }
+        // 文本内容
         text = html.substring(0, textEnd)
       }
 
@@ -194,6 +200,7 @@ export function parseHTML (html, options) {
       }
       advance(start[0].length)
       let end, attr
+      // 收集属性
       while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
         attr.start = index
         advance(attr[0].length)
@@ -248,10 +255,11 @@ export function parseHTML (html, options) {
     }
 
     if (options.start) {
+      // 创建开始标签的ast 
       options.start(tagName, attrs, unary, match.start, match.end)
     }
   }
-
+  // 解析结束标签
   function parseEndTag (tagName, start, end) {
     let pos, lowerCasedTagName
     if (start == null) start = index

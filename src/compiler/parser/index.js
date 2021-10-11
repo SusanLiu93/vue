@@ -150,6 +150,7 @@ export function parse (
           const name = element.slotTarget || '"default"'
           ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
         }
+        // 维系父子关系 
         currentParent.children.push(element)
         element.parent = currentParent
       }
@@ -214,6 +215,7 @@ export function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
+    // 开始标签 ast 创建
     start (tag, attrs, unary, start, end) {
       // check namespace.
       // inherit parent ns if there is one
@@ -224,7 +226,17 @@ export function parse (
       if (isIE && ns === 'svg') {
         attrs = guardIESVGBug(attrs)
       }
-
+      /**
+       * {
+       *   type: 1, // 普通元素
+           tag, // 标签 eg:ul
+           attrsList: attrs, // 属性列表 [{name,value,start,end}]
+           attrsMap: makeAttrsMap(attrs), // 上面列表以name为主键，对象为值得map数据结构
+           rawAttrsMap: {},
+           parent,
+           children: []
+       * }
+       */
       let element: ASTElement = createASTElement(tag, attrs, currentParent)
       if (ns) {
         element.ns = ns
@@ -252,7 +264,7 @@ export function parse (
           }
         })
       }
-
+      // 不允许是 style标签 以及script type='text/javascript'
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
         process.env.NODE_ENV !== 'production' && warn(
@@ -282,25 +294,29 @@ export function parse (
       } else if (!element.processed) {
         // structural directives
         processFor(element)
+        // 如果属性中有v-if ，那么会在element上添加 if 属性  值就是v-if 后面得表达式
+        // 同时新增ifConditions[] 属性  {exp:表达式，block:{element}}
         processIf(element)
         processOnce(element)
       }
 
       if (!root) {
         root = element
+        // 根元素约束 // 不能是template slot  也不能有v-for 循环
         if (process.env.NODE_ENV !== 'production') {
           checkRootConstraints(root)
         }
       }
 
       if (!unary) {
+        // 非一元标签 将element对象推入进栈 ['[object ul]']
         currentParent = element
         stack.push(element)
       } else {
         closeElement(element)
       }
     },
-
+    // 结束标签 ast 处理
     end (tag, start, end) {
       const element = stack[stack.length - 1]
       // pop stack
@@ -311,8 +327,14 @@ export function parse (
       }
       closeElement(element)
     },
-
+    /**
+     * type :  
+     *   2 ---- 表达式
+     *   3 ---- 纯文本
+     */
+    // 文本内容
     chars (text: string, start: number, end: number) {
+      // 根元素判断
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
           if (text === template) {
@@ -363,14 +385,14 @@ export function parse (
         let child: ?ASTNode
         if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
           child = {
-            type: 2,
+            type: 2, // 表达式
             expression: res.expression,
             tokens: res.tokens,
             text
           }
         } else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
           child = {
-            type: 3,
+            type: 3, // 纯文本
             text
           }
         }
@@ -532,6 +554,7 @@ export function parseFor (exp: string): ?ForParseResult {
 }
 
 function processIf (el) {
+  // exp 拿到v-if 后面得表达式
   const exp = getAndRemoveAttr(el, 'v-if')
   if (exp) {
     el.if = exp

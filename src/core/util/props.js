@@ -20,8 +20,8 @@ type PropOptions = {
 
 export function validateProp (
   key: string,
-  propOptions: Object,
-  propsData: Object,
+  propOptions: Object, // 规范后的propOptions {arr:{type:String}}
+  propsData: Object, // props {key:value}
   vm?: Component
 ): any {
   const prop = propOptions[key]

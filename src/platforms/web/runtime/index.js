@@ -39,6 +39,7 @@ Vue.prototype.$mount = function (
   hydrating?: boolean
 ): Component {
   el = el && inBrowser ? query(el) : undefined
+  // vue---实例 ; el---当前实例挂载的dom节点
   return mountComponent(this, el, hydrating)
 }
 
