@@ -30,7 +30,7 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
     el.classBinding = classBinding
   }
 }
-
+// 编译genData最终调用的地方
 function genData (el: ASTElement): string {
   let data = ''
   if (el.staticClass) {

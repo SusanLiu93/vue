@@ -57,7 +57,7 @@ export function initMixin (Vue: Class<Component>) {
     // 在beforeCreate 中无法访问data props 等
     callHook(vm, 'beforeCreate')
     initInjections(vm) // resolve injections before data/props
-    initState(vm)
+    initState(vm) // props methods data computed watch
     initProvide(vm) // resolve provide after data/props
     // 在 created 中可以访问 data props methods
     callHook(vm, 'created')
